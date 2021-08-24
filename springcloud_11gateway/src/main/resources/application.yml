@@ -1,0 +1,38 @@
+server:
+  port: 7979
+spring:
+  application:
+    name: GATEWAY
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+    gateway:
+      routes:
+        - id: category_router
+          #uri: http://localhost:8787 #类别服务地址
+          uri: lb://CATEGORY
+          predicates: #断言
+            - Path=/category/**
+          filters:
+            - StripPrefix=1
+
+        - id: product_router
+          #uri: http://localhost:8788 #类别服务地址
+          uri: lb://PRODUCT
+          predicates: #断言
+            - Path=/list
+           # - Cookie=username,[A-Za-z0-9]+
+           # - Header=X-Request-Id,\d+
+            - Method=get
+          filters:
+            - AddRequestHeader=User-Name, wei
+            - AddRequestParameter=color, blue
+            - AddResponseHeader=Response_color, green
+           # - StripPrefix=1
+            - PrefixPath=/product
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
